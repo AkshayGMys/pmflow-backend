@@ -24,10 +24,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+    	
+        String path = request.getServletPath();
+        System.out.println("⚠ Skipping filter for: " + request.getServletPath());
+        return path.startsWith("/api/auth/");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
-                                    throws ServletException, IOException {
+            throws ServletException, IOException {
+
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String username;
@@ -52,7 +61,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
-
+        System.out.println("🔍 Path: " + request.getRequestURI());
         filterChain.doFilter(request, response);
     }
 }

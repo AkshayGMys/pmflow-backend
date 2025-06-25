@@ -38,7 +38,7 @@ public class AuthService {
         );
 
         String token = jwtService.generateToken((org.springframework.security.core.userdetails.UserDetails) authentication.getPrincipal());
-
+        System.out.println(" Authentication success");
         return new AuthResponse(token, 86400000); // Match with jwt.expirationMs
     }
 
