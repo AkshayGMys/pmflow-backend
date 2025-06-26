@@ -53,8 +53,9 @@ public class AuthService {
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setCreatedAt(java.time.LocalDateTime.now());
+        user.setUpdatedAt(java.time.LocalDateTime.now());
         user.setRole(com.example.pmflow.entity.Role.MEMBER);
-
         userRepository.save(user);
     }
 }
