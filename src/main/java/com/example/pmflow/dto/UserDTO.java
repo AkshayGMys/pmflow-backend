@@ -35,6 +35,13 @@ public class UserDTO {
 	public void setRole(Role role) {
 		this.role = role;
 	}
+	private Long id;
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
 	private String username;
     private String email;
     private String firstName;
