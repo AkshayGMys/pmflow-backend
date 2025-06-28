@@ -3,6 +3,7 @@ package com.example.pmflow.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -29,6 +30,26 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
             	    .requestMatchers("/api/auth/**").permitAll()
+            	    
+            	    // ✅ ADMIN Access
+                    .requestMatchers(HttpMethod.POST, "/api/projects/create").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/api/projects/all").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/api/projects/filter").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/api/projects/count").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/api/projects/{projectId}").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/api/projects/by_name").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/api/projects/{projectId}").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/api/projects/by_name/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/api/projects/{projectId}").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/api/projects/by_name/**").hasRole("ADMIN")
+
+                    // ✅ PROJECT_MANAGER Access
+                    .requestMatchers(HttpMethod.GET, "/api/projects/manager/**").hasRole("PROJECT_MANAGER")
+                    .requestMatchers(HttpMethod.GET, "/api/projects/manager/**/count").hasRole("PROJECT_MANAGER")
+                    .requestMatchers(HttpMethod.GET, "/api/projects/manager/**/filter").hasRole("PROJECT_MANAGER")
+                    .requestMatchers(HttpMethod.GET, "/api/projects/manager/**/by_name").hasRole("PROJECT_MANAGER") 
+
+                    // ✅ All other endpoints need authentication
             	    .anyRequest().authenticated()
             	)
 
