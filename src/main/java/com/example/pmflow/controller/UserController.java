@@ -43,4 +43,9 @@ public class UserController {
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
+    
+    @GetMapping("/role/{role}")
+    public ResponseEntity<List<UserDTO>> getUsersByRole(@PathVariable String role) {
+        return ResponseEntity.ok(userService.getUsersByRole(role));
+    }
 }
