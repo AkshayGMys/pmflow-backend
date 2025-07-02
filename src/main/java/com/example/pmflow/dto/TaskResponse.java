@@ -1,11 +1,11 @@
 package com.example.pmflow.dto;
 
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Data
 public class TaskResponse {
-    private Long id;
     public Long getId() {
 		return id;
 	}
@@ -48,6 +48,24 @@ public class TaskResponse {
 	public void setAssigneeId(Long assigneeId) {
 		this.assigneeId = assigneeId;
 	}
+	public String getAssigneeFirstName() {
+		return assigneeFirstName;
+	}
+	public void setAssigneeFirstName(String assigneeFirstName) {
+		this.assigneeFirstName = assigneeFirstName;
+	}
+	public String getAssigneeLastName() {
+		return assigneeLastName;
+	}
+	public void setAssigneeLastName(String assigneeLastName) {
+		this.assigneeLastName = assigneeLastName;
+	}
+	public LocalDateTime getDueDate() {
+		return dueDate;
+	}
+	public void setDueDate(LocalDateTime dueDate) {
+		this.dueDate = dueDate;
+	}
 	public LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
@@ -60,12 +78,16 @@ public class TaskResponse {
 	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
-	private String name;
+	private Long id;
+    private String name;
     private String description;
     private String priority;
     private String status;
     private Long projectId;
     private Long assigneeId;
+    private String assigneeFirstName;  
+    private String assigneeLastName;  
+    private LocalDateTime dueDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

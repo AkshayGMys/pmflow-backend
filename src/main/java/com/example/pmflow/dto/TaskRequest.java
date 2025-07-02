@@ -2,6 +2,8 @@ package com.example.pmflow.dto;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class TaskRequest {
     private String name;
@@ -41,9 +43,16 @@ public class TaskRequest {
 	public void setAssigneeId(Long assigneeId) {
 		this.assigneeId = assigneeId;
 	}
+	public LocalDateTime getDueDate() {
+		return dueDate;
+	}
+	public void setDueDate(LocalDateTime dueDate) {
+		this.dueDate = dueDate;
+	}
 	private String description;
     private String priority;
     private String status;
     private Long projectId;
     private Long assigneeId;
+    private LocalDateTime dueDate; 
 }

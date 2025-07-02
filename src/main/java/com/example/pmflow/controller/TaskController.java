@@ -23,6 +23,11 @@ public class TaskController {
         return ResponseEntity.ok(createdTask);
     }
 
+    @GetMapping("/{taskId}")
+    public ResponseEntity<TaskResponse> getTaskById(@PathVariable Long taskId) {
+        return ResponseEntity.ok(taskService.getTaskById(taskId));
+    }
+
     // ✅ Get all tasks for a specific project
     @GetMapping("/project/{projectId}")
     public ResponseEntity<List<TaskResponse>> getTasksByProject(@PathVariable Long projectId) {

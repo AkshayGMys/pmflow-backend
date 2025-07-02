@@ -43,8 +43,10 @@ public class TaskService {
         task.setDescription(request.getDescription());
         task.setPriority(request.getPriority());
         task.setStatus(request.getStatus());
+        task.setDueDate(request.getDueDate()); 
         task.setProject(project);
         task.setAssignee(assignee);
+
 
         Task savedTask = taskRepository.save(task);
         return mapToResponse(savedTask);
@@ -75,6 +77,13 @@ public class TaskService {
         Task updated = taskRepository.save(task);
         return mapToResponse(updated);
     }
+    public TaskResponse getTaskById(Long taskId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found with id: " + taskId));
+
+        return mapToResponse(task);
+    }
+
 
     // ✅ Assign task to a user
     public TaskResponse assignTask(Long taskId, Long userId) {
@@ -89,7 +98,6 @@ public class TaskService {
         return mapToResponse(updated);
     }
 
-    // ✅ Convert Task to TaskResponse DTO
     private TaskResponse mapToResponse(Task task) {
         TaskResponse response = new TaskResponse();
         response.setId(task.getId());
@@ -98,9 +106,20 @@ public class TaskService {
         response.setPriority(task.getPriority());
         response.setStatus(task.getStatus());
         response.setProjectId(task.getProject().getId());
-        response.setAssigneeId(task.getAssignee() != null ? task.getAssignee().getId() : null);
+
+        if (task.getAssignee() != null) {
+            response.setAssigneeId(task.getAssignee().getId());
+            response.setAssigneeFirstName(task.getAssignee().getFirstName());
+            response.setAssigneeLastName(task.getAssignee().getLastName());
+        }
+
+        response.setDueDate(task.getDueDate());
         response.setCreatedAt(task.getCreatedAt());
         response.setUpdatedAt(task.getUpdatedAt());
+
         return response;
     }
+
+
 }
+
