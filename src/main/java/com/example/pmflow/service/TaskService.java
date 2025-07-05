@@ -1,5 +1,6 @@
 package com.example.pmflow.service;
 
+import com.example.pmflow.dto.AdminUpdateTaskRequest;
 import com.example.pmflow.dto.TaskRequest;
 import com.example.pmflow.dto.TaskResponse;
 import com.example.pmflow.dto.UpdateTaskRequest;
@@ -139,6 +140,21 @@ public class TaskService {
         Task updatedTask = taskRepository.save(task);
         return mapToResponse(updatedTask);
     }
+    public TaskResponse adminUpdateTask(Long taskId, AdminUpdateTaskRequest request) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found with ID: " + taskId));
+
+        if (request.getName() != null) {
+            task.setName(request.getName());
+        }
+        if (request.getStatus() != null) {
+            task.setStatus(request.getStatus());
+        }
+
+        Task updatedTask = taskRepository.save(task);
+        return mapToResponse(updatedTask);
+    }
+
 
 
 
