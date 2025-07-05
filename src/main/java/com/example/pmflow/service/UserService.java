@@ -1,12 +1,14 @@
 package com.example.pmflow.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.example.pmflow.dto.UserDTO;
+import com.example.pmflow.entity.Role;
 import com.example.pmflow.entity.User;
 import com.example.pmflow.repository.UserRepository;
 
@@ -34,6 +36,18 @@ public class UserService {
 
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream().map(this::toDTO).toList();
+    }
+    
+    public List<UserDTO> getUsersByRole(String role) {
+        Role enumRole;
+        try {
+            enumRole = Role.valueOf(role.toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new RuntimeException("Invalid role: " + role);
+        }
+
+        List<User> users = userRepository.findByRole(enumRole);
+        return users.stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     private UserDTO toDTO(User user) {
