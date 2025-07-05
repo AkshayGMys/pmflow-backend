@@ -1,6 +1,7 @@
 package com.example.pmflow.controller;
 
 
+import com.example.pmflow.dto.AdminUpdateUserRequest;
 import com.example.pmflow.dto.UserDTO;
 import com.example.pmflow.entity.User;
 import com.example.pmflow.service.UserService;
@@ -47,5 +48,11 @@ public class UserController {
     @GetMapping("/role/{role}")
     public ResponseEntity<List<UserDTO>> getUsersByRole(@PathVariable String role) {
         return ResponseEntity.ok(userService.getUsersByRole(role));
+    }
+    @PutMapping("/admin/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserDTO> updateUserByAdmin(@PathVariable Long userId,
+                                                     @RequestBody AdminUpdateUserRequest request) {
+        return ResponseEntity.ok(userService.adminUpdateUser(userId, request));
     }
 }
