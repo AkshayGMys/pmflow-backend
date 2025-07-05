@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+import com.example.pmflow.enums.TaskPriority;
+import com.example.pmflow.enums.TaskStatus;
+
 @Data
 public class TaskResponse {
     public Long getId() {
@@ -24,18 +27,7 @@ public class TaskResponse {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public String getPriority() {
-		return priority;
-	}
-	public void setPriority(String priority) {
-		this.priority = priority;
-	}
-	public String getStatus() {
-		return status;
-	}
-	public void setStatus(String status) {
-		this.status = status;
-	}
+	
 	public Long getProjectId() {
 		return projectId;
 	}
@@ -78,11 +70,23 @@ public class TaskResponse {
 	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
+	public TaskPriority getPriority() {
+		return priority;
+	}
+	public void setPriority(TaskPriority priority) {
+		this.priority = priority;
+	}
+	public TaskStatus getStatus() {
+		return status;
+	}
+	public void setStatus(TaskStatus status) {
+		this.status = status;
+	}
 	private Long id;
     private String name;
     private String description;
-    private String priority;
-    private String status;
+    private TaskPriority priority;
+	private TaskStatus status;
     private Long projectId;
     private Long assigneeId;
     private String assigneeFirstName;  

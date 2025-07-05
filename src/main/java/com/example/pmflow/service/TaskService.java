@@ -2,9 +2,11 @@ package com.example.pmflow.service;
 
 import com.example.pmflow.dto.TaskRequest;
 import com.example.pmflow.dto.TaskResponse;
+import com.example.pmflow.dto.UpdateTaskRequest;
 import com.example.pmflow.entity.Project;
 import com.example.pmflow.entity.Task;
 import com.example.pmflow.entity.User;
+import com.example.pmflow.enums.TaskStatus;
 import com.example.pmflow.repository.ProjectRepository;
 import com.example.pmflow.repository.TaskRepository;
 import com.example.pmflow.repository.UserRepository;
@@ -69,7 +71,7 @@ public class TaskService {
     }
 
     // ✅ Update task status
-    public TaskResponse updateTaskStatus(Long taskId, String status) {
+    public TaskResponse updateTaskStatus(Long taskId, TaskStatus status) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
@@ -119,6 +121,25 @@ public class TaskService {
 
         return response;
     }
+    public TaskResponse updateTaskDetails(Long taskId, UpdateTaskRequest request) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        if (request.getName() != null) task.setName(request.getName());
+        if (request.getDescription() != null) task.setDescription(request.getDescription());
+        if (request.getPriority() != null) task.setPriority(request.getPriority());
+        if (request.getDueDate() != null) task.setDueDate(request.getDueDate());
+
+        if (request.getAssigneeId() != null) {
+            User assignee = userRepository.findById(request.getAssigneeId())
+                    .orElseThrow(() -> new RuntimeException("Assignee not found"));
+            task.setAssignee(assignee);
+        }
+
+        Task updatedTask = taskRepository.save(task);
+        return mapToResponse(updatedTask);
+    }
+
 
 
 }
