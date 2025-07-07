@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -57,6 +56,14 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
+    public List<ProjectSummaryDTO> getProjectsByManagerId(Long managerId) {
+        logger.info("Fetching projects for manager ID: {}", managerId);
+        return projectRepository.findAll().stream()
+                .filter(p -> p.getManager().getId().equals(managerId))
+                .map(this::convertToSummaryDTO)
+                .collect(Collectors.toList());
+    }
+
     public ProjectDetailDTO getProjectById(Long projectId) {
         logger.info("Fetching project with ID: {}", projectId);
         Project project = projectRepository.findById(projectId)
@@ -71,15 +78,26 @@ public class ProjectService {
         return detailed ? convertToDetailDTO(project) : convertToSummaryDTO(project);
     }
 
-    public ProjectDetailDTO getProjectByNameForManager(String projectName, String managerUsername) {
-        logger.info("Manager {} requesting project by name: {}", managerUsername, projectName);
+    public Object getProjectByNameForManager(String projectName, Long managerId, boolean detailed) {
+        logger.info("Manager ID {} requesting project by name: {}", managerId, projectName);
         Project project = projectRepository.findByName(projectName)
                 .orElseThrow(() -> new RuntimeException("Project not found with name: " + projectName));
-
-        if (!project.getManager().getUsername().equals(managerUsername)) {
+        if (!Objects.equals(project.getManager().getId(), managerId)) {
             throw new RuntimeException("Access denied: You are not the manager of this project.");
         }
-        return convertToDetailDTO(project);
+        return detailed ? convertToDetailDTO(project) : convertToSummaryDTO(project);
+    }
+
+    public List<TeamMemberDTO> getTeamMembersOfProject(Long projectId, Long managerId) {
+        logger.info("Fetching team members for project ID: {} by manager ID: {}", projectId, managerId);
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+        if (!Objects.equals(project.getManager().getId(), managerId)) {
+            throw new RuntimeException("Access denied: You are not the manager of this project.");
+        }
+        return project.getTeamMembers().stream()
+                .map(user -> new TeamMemberDTO(user.getId(), user.getUsername()))
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -88,6 +106,25 @@ public class ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
         return updateProjectFields(project, request);
+    }
+
+    @Transactional
+    public ProjectDetailDTO updateProjectEndDateAndStatusByManager(Long projectId, Long managerId, String endDate, String status) {
+        logger.info("Manager ID {} updating status and endDate for project ID: {}", managerId, projectId);
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+        if (!Objects.equals(project.getManager().getId(), managerId)) {
+            throw new RuntimeException("Access denied: You are not the manager of this project.");
+        }
+        if (status != null) {
+            project.setStatus(ProjectStatus.valueOf(status));
+        }
+        if (endDate != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+            project.setEndDate(LocalDate.parse(endDate, formatter));
+        }
+        Project updated = projectRepository.save(project);
+        return convertToDetailDTO(updated);
     }
 
     @Transactional
@@ -134,12 +171,6 @@ public class ProjectService {
         projectRepository.delete(project);
     }
 
-    public List<ProjectSummaryDTO> getProjectsByManager(String managerUsername) {
-        logger.info("Fetching projects for manager: {}", managerUsername);
-        List<Project> projects = projectRepository.findByManagerUsername(managerUsername);
-        return projects.stream().map(this::convertToSummaryDTO).collect(Collectors.toList());
-    }
-
     public List<ProjectSummaryDTO> filterProjects(String projectName, String managerName, String status, String endDate) {
         logger.info("Filtering projects with criteria - name: {}, manager: {}, status: {}, endDate: {}",
                 projectName, managerName, status, endDate);
@@ -157,11 +188,17 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
-    public List<ProjectSummaryDTO> filterProjectsByManager(String managerUsername, String projectName, String status, String endDate) {
-        logger.info("Filtering manager's projects - manager: {}, name: {}, status: {}, endDate: {}",
-                managerUsername, projectName, status, endDate);
+    public long countProjectsByStatus(ProjectStatus status) {
+        logger.info("Counting all projects with status: {}", status);
+        return projectRepository.countByStatus(status);
+    }
 
-        return projectRepository.findByManagerUsername(managerUsername).stream()
+    // ✅ NEW: Filter projects by manager
+    public List<ProjectSummaryDTO> filterProjectsByManager(Long managerId, String projectName, String status, String endDate) {
+        logger.info("Filtering projects for manager {} with - name: {}, status: {}, endDate: {}", managerId, projectName, status, endDate);
+
+        return projectRepository.findAll().stream()
+                .filter(p -> p.getManager().getId().equals(managerId))
                 .filter(p -> projectName == null || p.getName().toLowerCase().contains(projectName.toLowerCase()))
                 .filter(p -> status == null || p.getStatus().name().equalsIgnoreCase(status))
                 .filter(p -> {
@@ -173,16 +210,13 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
-    public long countProjectsByManagerAndStatus(String managerUsername, ProjectStatus status) {
-        logger.info("Counting projects for manager: {} with status: {}", managerUsername, status);
-        return projectRepository.findByManagerUsername(managerUsername).stream()
-                .filter(p -> p.getStatus() == status)
+    // ✅ NEW: Count projects by manager and status
+    public long countProjectsByStatusForManager(Long managerId, ProjectStatus status) {
+        logger.info("Counting projects for manager {} with status: {}", managerId, status);
+        return projectRepository.findAll().stream()
+                .filter(p -> p.getManager().getId().equals(managerId))
+                .filter(p -> p.getStatus().equals(status))
                 .count();
-    }
-
-    public long countProjectsByStatus(ProjectStatus status) {
-        logger.info("Counting all projects with status: {}", status);
-        return projectRepository.countByStatus(status);
     }
 
     private ProjectSummaryDTO convertToSummaryDTO(Project p) {
@@ -190,6 +224,7 @@ public class ProjectService {
         dto.setId(p.getId());
         dto.setName(p.getName());
         dto.setStatus(p.getStatus().name());
+        dto.setStartDate(p.getStartDate() != null ? p.getStartDate().toString() : null);
         dto.setEndDate(p.getEndDate() != null ? p.getEndDate().toString() : null);
         dto.setManagerName(p.getManager().getUsername());
         return dto;
@@ -204,7 +239,10 @@ public class ProjectService {
         dto.setEndDate(p.getEndDate() != null ? p.getEndDate().toString() : null);
         dto.setStatus(p.getStatus().name());
         dto.setManagerName(p.getManager().getUsername());
-        dto.setTeamMembers(p.getTeamMembers().stream().map(User::getUsername).collect(Collectors.toList()));
+        dto.setTeamMembers(p.getTeamMembers().stream()
+                .map(u -> u.getId() + ":" + u.getUsername())
+                .collect(Collectors.toList()));
         return dto;
     }
 }
+
