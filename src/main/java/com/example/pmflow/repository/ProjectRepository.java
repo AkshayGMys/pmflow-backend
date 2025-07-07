@@ -37,6 +37,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
     // 🔢 Manager: Count projects managed by a manager
     Long countByManager(User manager);
     
-    //Admin count projects by status
+   
     
 }
