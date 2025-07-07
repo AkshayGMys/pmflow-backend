@@ -1,10 +1,14 @@
 package com.example.pmflow.controller;
 
+import com.example.pmflow.dto.AdminUpdateTaskRequest;
 import com.example.pmflow.dto.TaskRequest;
 import com.example.pmflow.dto.TaskResponse;
+import com.example.pmflow.dto.UpdateTaskRequest;
+import com.example.pmflow.enums.TaskStatus;
 import com.example.pmflow.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,7 +47,7 @@ public class TaskController {
     // ✅ Update the status of a task
     @PutMapping("/{taskId}/status")
     public ResponseEntity<TaskResponse> updateTaskStatus(@PathVariable Long taskId,
-                                                         @RequestParam String status) {
+                                                         @RequestParam TaskStatus status) {
         return ResponseEntity.ok(taskService.updateTaskStatus(taskId, status));
     }
 
@@ -53,4 +57,16 @@ public class TaskController {
                                                    @RequestParam Long userId) {
         return ResponseEntity.ok(taskService.assignTask(taskId, userId));
     }
+    @PutMapping("/{taskId}")
+    public ResponseEntity<TaskResponse> updateTask(@PathVariable Long taskId,
+                                                   @RequestBody UpdateTaskRequest request) {
+        return ResponseEntity.ok(taskService.updateTaskDetails(taskId, request));
+    }
+    @PutMapping("/admin/{taskId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<TaskResponse> updateTaskByAdmin(@PathVariable Long taskId,
+                                                          @RequestBody AdminUpdateTaskRequest request) {
+        return ResponseEntity.ok(taskService.adminUpdateTask(taskId, request));
+    }
+
 }

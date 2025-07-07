@@ -3,6 +3,9 @@ package com.example.pmflow.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import com.example.pmflow.enums.TaskPriority;
+import com.example.pmflow.enums.TaskStatus;
+
 @Entity
 @Table(name = "tasks")
 public class Task {
@@ -36,22 +39,6 @@ public class Task {
 
 	public void setDueDate(LocalDateTime dueDate) {
 		this.dueDate = dueDate;
-	}
-
-	public String getPriority() {
-		return priority;
-	}
-
-	public void setPriority(String priority) {
-		this.priority = priority;
-	}
-
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
 	}
 
 	public Project getProject() {
@@ -97,9 +84,27 @@ public class Task {
 
     private LocalDateTime dueDate;
 
-    private String priority;
+    public TaskPriority getPriority() {
+		return priority;
+	}
 
-    private String status; // "TO_DO", "IN_PROGRESS", "DONE"
+	public void setPriority(TaskPriority priority) {
+		this.priority = priority;
+	}
+
+	public TaskStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(TaskStatus status) {
+		this.status = status;
+	}
+
+	@Enumerated(EnumType.STRING)
+    private TaskPriority priority;
+
+    @Enumerated(EnumType.STRING)
+    private TaskStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)

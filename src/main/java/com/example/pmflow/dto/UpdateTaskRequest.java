@@ -8,9 +8,8 @@ import com.example.pmflow.enums.TaskPriority;
 import com.example.pmflow.enums.TaskStatus;
 
 @Data
-public class TaskRequest {
-   
-
+public class UpdateTaskRequest {
+    private String name;
     public String getName() {
 		return name;
 	}
@@ -23,12 +22,11 @@ public class TaskRequest {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-
-	public Long getProjectId() {
-		return projectId;
+	public LocalDateTime getDueDate() {
+		return dueDate;
 	}
-	public void setProjectId(Long projectId) {
-		this.projectId = projectId;
+	public void setDueDate(LocalDateTime dueDate) {
+		this.dueDate = dueDate;
 	}
 	public Long getAssigneeId() {
 		return assigneeId;
@@ -36,14 +34,8 @@ public class TaskRequest {
 	public void setAssigneeId(Long assigneeId) {
 		this.assigneeId = assigneeId;
 	}
-	public LocalDateTime getDueDate() {
-		return dueDate;
-	}
-	public void setDueDate(LocalDateTime dueDate) {
-		this.dueDate = dueDate;
-	}
-	 private String name;
-	 public TaskPriority getPriority() {
+	private TaskPriority priority;
+	public TaskPriority getPriority() {
 		return priority;
 	}
 	public void setPriority(TaskPriority priority) {
@@ -55,10 +47,9 @@ public class TaskRequest {
 	public void setStatus(TaskStatus status) {
 		this.status = status;
 	}
-	private TaskPriority priority;
-	 private TaskStatus status;
+	private TaskStatus status;
 	private String description;
-    private Long projectId;
+    private LocalDateTime dueDate;
     private Long assigneeId;
-    private LocalDateTime dueDate; 
+
 }
