@@ -94,4 +94,19 @@ public class TaskResponse {
     private LocalDateTime dueDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    public String getProjectName() {
+		return projectName;
+	}
+	public void setProjectName(String projectName) {
+		this.projectName = projectName;
+	}
+	public String getProjectManagerName() {
+		return projectManagerName;
+	}
+	public void setProjectManagerName(String projectManagerName) {
+		this.projectManagerName = projectManagerName;
+	}
+	private String projectName;
+    private String projectManagerName;
+
 }

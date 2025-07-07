@@ -115,6 +115,10 @@ public class TaskService {
             response.setAssigneeFirstName(task.getAssignee().getFirstName());
             response.setAssigneeLastName(task.getAssignee().getLastName());
         }
+        if (task.getProject().getManager() != null) {
+            User manager = task.getProject().getManager();
+            response.setProjectManagerName(manager.getFirstName() + " " + manager.getLastName());
+        }
 
         response.setDueDate(task.getDueDate());
         response.setCreatedAt(task.getCreatedAt());
