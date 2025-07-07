@@ -1,10 +1,13 @@
 package com.example.pmflow.service;
 
+import com.example.pmflow.dto.AdminUpdateTaskRequest;
 import com.example.pmflow.dto.TaskRequest;
 import com.example.pmflow.dto.TaskResponse;
+import com.example.pmflow.dto.UpdateTaskRequest;
 import com.example.pmflow.entity.Project;
 import com.example.pmflow.entity.Task;
 import com.example.pmflow.entity.User;
+import com.example.pmflow.enums.TaskStatus;
 import com.example.pmflow.repository.ProjectRepository;
 import com.example.pmflow.repository.TaskRepository;
 import com.example.pmflow.repository.UserRepository;
@@ -69,7 +72,7 @@ public class TaskService {
     }
 
     // ✅ Update task status
-    public TaskResponse updateTaskStatus(Long taskId, String status) {
+    public TaskResponse updateTaskStatus(Long taskId, TaskStatus status) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
@@ -112,6 +115,10 @@ public class TaskService {
             response.setAssigneeFirstName(task.getAssignee().getFirstName());
             response.setAssigneeLastName(task.getAssignee().getLastName());
         }
+        if (task.getProject().getManager() != null) {
+            User manager = task.getProject().getManager();
+            response.setProjectManagerName(manager.getFirstName() + " " + manager.getLastName());
+        }
 
         response.setDueDate(task.getDueDate());
         response.setCreatedAt(task.getCreatedAt());
@@ -119,6 +126,40 @@ public class TaskService {
 
         return response;
     }
+    public TaskResponse updateTaskDetails(Long taskId, UpdateTaskRequest request) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        if (request.getName() != null) task.setName(request.getName());
+        if (request.getDescription() != null) task.setDescription(request.getDescription());
+        if (request.getPriority() != null) task.setPriority(request.getPriority());
+        if (request.getDueDate() != null) task.setDueDate(request.getDueDate());
+
+        if (request.getAssigneeId() != null) {
+            User assignee = userRepository.findById(request.getAssigneeId())
+                    .orElseThrow(() -> new RuntimeException("Assignee not found"));
+            task.setAssignee(assignee);
+        }
+
+        Task updatedTask = taskRepository.save(task);
+        return mapToResponse(updatedTask);
+    }
+    public TaskResponse adminUpdateTask(Long taskId, AdminUpdateTaskRequest request) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found with ID: " + taskId));
+
+        if (request.getName() != null) {
+            task.setName(request.getName());
+        }
+        if (request.getStatus() != null) {
+            task.setStatus(request.getStatus());
+        }
+
+        Task updatedTask = taskRepository.save(task);
+        return mapToResponse(updatedTask);
+    }
+
+
 
 
 }

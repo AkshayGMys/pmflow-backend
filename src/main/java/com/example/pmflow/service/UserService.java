@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.example.pmflow.dto.AdminUpdateUserRequest;
 import com.example.pmflow.dto.UserDTO;
 import com.example.pmflow.entity.Role;
 import com.example.pmflow.entity.User;
@@ -60,4 +61,32 @@ public class UserService {
         dto.setId(user.getId());
         return dto;
     }
+    public UserDTO adminUpdateUser(Long userId, AdminUpdateUserRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (request.getFirstName() != null) {
+            user.setFirstName(request.getFirstName());
+        }
+
+        if (request.getLastName() != null) {
+            user.setLastName(request.getLastName());
+        }
+
+        if (request.getRole() != null) {
+            user.setRole(request.getRole());
+        }
+
+        User updated = userRepository.save(user);
+
+        // Convert to DTO
+        UserDTO dto = new UserDTO();
+        dto.setUsername(updated.getUsername());
+        dto.setEmail(updated.getEmail());
+        dto.setFirstName(updated.getFirstName());
+        dto.setLastName(updated.getLastName());
+        dto.setRole(updated.getRole());
+        return dto;
+    }
+
 }
