@@ -122,6 +122,7 @@ public class TaskService {
         if (task.getProject().getName() != null) {
             response.setProjectName(task.getProject().getName());
          }
+
         response.setDueDate(task.getDueDate());
         response.setCreatedAt(task.getCreatedAt());
         response.setUpdatedAt(task.getUpdatedAt());
@@ -165,7 +166,6 @@ public class TaskService {
                 .orElseThrow(() -> new RuntimeException("Task not found with ID: " + taskId));
         taskRepository.delete(task);
     }
-
 
 
 
