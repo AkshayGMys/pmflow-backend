@@ -119,6 +119,9 @@ public class TaskService {
             User manager = task.getProject().getManager();
             response.setProjectManagerName(manager.getFirstName() + " " + manager.getLastName());
         }
+        if (task.getProject().getName() != null) {
+            response.setProjectName(task.getProject().getName());
+         }
 
         response.setDueDate(task.getDueDate());
         response.setCreatedAt(task.getCreatedAt());
@@ -157,6 +160,11 @@ public class TaskService {
 
         Task updatedTask = taskRepository.save(task);
         return mapToResponse(updatedTask);
+    }
+    public void deleteTask(Long taskId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found with ID: " + taskId));
+        taskRepository.delete(task);
     }
 
 
