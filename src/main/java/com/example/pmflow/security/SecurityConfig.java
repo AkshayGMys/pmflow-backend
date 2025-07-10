@@ -34,8 +34,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
-
-                // ✅ ADMIN Access
+                // ✅ ADMIN endpoints
                 .requestMatchers(HttpMethod.POST, "/api/projects/create").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/projects/all").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/projects/filter").hasRole("ADMIN")
@@ -47,11 +46,13 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/projects/{projectId}").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/projects/by_name/**").hasRole("ADMIN")
 
-                // ✅ PROJECT_MANAGER Access
-                .requestMatchers(HttpMethod.GET, "/api/projects/manager/**").hasRole("PROJECT_MANAGER")
-                .requestMatchers(HttpMethod.GET, "/api/projects/manager/**/count").hasRole("PROJECT_MANAGER")
+                // ✅ PROJECT_MANAGER endpoints
                 .requestMatchers(HttpMethod.GET, "/api/projects/manager/**/filter").hasRole("PROJECT_MANAGER")
                 .requestMatchers(HttpMethod.GET, "/api/projects/manager/**/by_name").hasRole("PROJECT_MANAGER")
+                .requestMatchers(HttpMethod.GET, "/api/projects/manager/**/team_members/*").hasRole("PROJECT_MANAGER")
+                .requestMatchers(HttpMethod.GET, "/api/projects/manager/**/count").hasRole("PROJECT_MANAGER")
+                .requestMatchers(HttpMethod.PUT, "/api/projects/manager/**/update_status_enddate/**").hasRole("PROJECT_MANAGER")
+                .requestMatchers(HttpMethod.GET, "/api/projects/manager/**").hasRole("PROJECT_MANAGER")
 
                 // ✅ All others require authentication
                 .anyRequest().authenticated()

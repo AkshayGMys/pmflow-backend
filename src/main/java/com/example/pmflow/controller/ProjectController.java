@@ -21,28 +21,24 @@ public class ProjectController {
         this.projectService = projectService;
     }
 
-    // ✅ Admin: Create new project
     @PostMapping("/create")
     public ResponseEntity<ProjectDetailDTO> createProject(@RequestBody ProjectCreateRequestDTO request) {
         logger.info("[POST] /api/projects/create - Creating new project");
         return ResponseEntity.ok(projectService.createProject(request));
     }
 
-    // ✅ Admin: Get all projects
     @GetMapping("/all")
     public ResponseEntity<List<ProjectSummaryDTO>> getAllProjects() {
         logger.info("[GET] /api/projects/all - Fetching all projects");
         return ResponseEntity.ok(projectService.getAllProjects());
     }
 
-    // ✅ Admin: Get project by ID
     @GetMapping("/{projectId}")
     public ResponseEntity<ProjectDetailDTO> getProjectById(@PathVariable Long projectId) {
         logger.info("[GET] /api/projects/{} - Fetching project by ID", projectId);
         return ResponseEntity.ok(projectService.getProjectById(projectId));
     }
 
-    // ✅ Admin: Get project by name (summary/detailed)
     @GetMapping("/by_name")
     public ResponseEntity<?> getProjectByName(@RequestParam String name,
                                               @RequestParam(defaultValue = "false") boolean detailed) {
@@ -50,7 +46,6 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.getProjectByName(name, detailed));
     }
 
-    // ✅ Admin: Update by ID
     @PutMapping("/{projectId}")
     public ResponseEntity<ProjectDetailDTO> updateProject(@PathVariable Long projectId,
                                                           @RequestBody ProjectUpdateRequestDTO request) {
@@ -58,7 +53,6 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.updateProject(projectId, request));
     }
 
-    // ✅ Admin: Update by name
     @PutMapping("/by_name/{projectName}")
     public ResponseEntity<ProjectDetailDTO> updateProjectByName(@PathVariable String projectName,
                                                                 @RequestBody ProjectUpdateRequestDTO request) {
@@ -66,7 +60,6 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.updateProjectByName(projectName, request));
     }
 
-    // ✅ Admin: Delete by ID
     @DeleteMapping("/{projectId}")
     public ResponseEntity<Void> deleteProject(@PathVariable Long projectId) {
         logger.info("[DELETE] /api/projects/{} - Deleting project", projectId);
@@ -74,7 +67,6 @@ public class ProjectController {
         return ResponseEntity.noContent().build();
     }
 
-    // ✅ Admin: Delete by name
     @DeleteMapping("/by_name/{projectName}")
     public ResponseEntity<Void> deleteProjectByName(@PathVariable String projectName) {
         logger.info("[DELETE] /api/projects/by_name/{} - Deleting project", projectName);
@@ -82,32 +74,36 @@ public class ProjectController {
         return ResponseEntity.noContent().build();
     }
 
-    // ✅ Manager: Get assigned projects (summary)
-    @GetMapping("/manager/{username}")
-    public ResponseEntity<List<ProjectSummaryDTO>> getProjectsByManager(@PathVariable String username) {
-        logger.info("[GET] /api/projects/manager/{} - Fetching manager's projects", username);
-        return ResponseEntity.ok(projectService.getProjectsByManager(username));
+    @GetMapping("/manager/{managerId}")
+    public ResponseEntity<List<ProjectSummaryDTO>> getProjectsByManagerId(@PathVariable Long managerId) {
+        logger.info("[GET] /api/projects/manager/{} - Fetching manager's projects", managerId);
+        return ResponseEntity.ok(projectService.getProjectsByManagerId(managerId));
     }
 
-    // ✅ Manager: Filter assigned projects (name/status/endDate are optional)
-    @GetMapping("/manager/{username}/filter")
-    public ResponseEntity<List<ProjectSummaryDTO>> filterProjectsForManager(@PathVariable String username,
-                                                                            @RequestParam(required = false) String projectName,
-                                                                            @RequestParam(required = false) String status,
-                                                                            @RequestParam(required = false) String endDate) {
-        logger.info("[GET] /api/projects/manager/{}/filter - Filtering own projects", username);
-        return ResponseEntity.ok(projectService.filterProjectsByManager(username, projectName, status, endDate));
+    @GetMapping("/manager/{managerId}/by_name")
+    public ResponseEntity<?> getProjectByNameForManager(@PathVariable Long managerId,
+                                                        @RequestParam String name,
+                                                        @RequestParam(defaultValue = "false") boolean detailed) {
+        logger.info("[GET] /api/projects/manager/{}/by_name?name={}, detailed={} - Getting project for manager", managerId, name, detailed);
+        return ResponseEntity.ok(projectService.getProjectByNameForManager(name, managerId, detailed));
     }
 
-    // ✅ Manager: Get project details (only if manager is assigned)
-    @GetMapping("/manager/{username}/by_name")
-    public ResponseEntity<ProjectDetailDTO> getProjectByNameForManager(@PathVariable String username,
-                                                                       @RequestParam String name) {
-        logger.info("[GET] /api/projects/manager/{}/by_name?name={} - Getting project detail for manager", username, name);
-        return ResponseEntity.ok(projectService.getProjectByNameForManager(name, username));
+    @PutMapping("/manager/{managerId}/update_status_enddate/{projectId}")
+    public ResponseEntity<ProjectDetailDTO> updateStatusAndEndDate(@PathVariable Long managerId,
+                                                                    @PathVariable Long projectId,
+                                                                    @RequestParam(required = false) String endDate,
+                                                                    @RequestParam(required = false) String status) {
+        logger.info("[PUT] /api/projects/manager/{}/update_status_enddate/{} - Updating status and endDate", managerId, projectId);
+        return ResponseEntity.ok(projectService.updateProjectEndDateAndStatusByManager(projectId, managerId, endDate, status));
     }
 
-    // ✅ Admin: Filter all projects
+    @GetMapping("/manager/{managerId}/team_members/{projectId}")
+    public ResponseEntity<List<TeamMemberDTO>> getTeamMembers(@PathVariable Long managerId,
+                                                               @PathVariable Long projectId) {
+        logger.info("[GET] /api/projects/manager/{}/team_members/{} - Fetching team members", managerId, projectId);
+        return ResponseEntity.ok(projectService.getTeamMembersOfProject(projectId, managerId));
+    }
+
     @GetMapping("/filter")
     public ResponseEntity<List<ProjectSummaryDTO>> filterProjects(@RequestParam(required = false) String projectName,
                                                                   @RequestParam(required = false) String managerName,
@@ -117,18 +113,29 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.filterProjects(projectName, managerName, status, endDate));
     }
 
-    // ✅ Manager: Count own projects by status
-    @GetMapping("/manager/{username}/count")
-    public ResponseEntity<Long> countProjectsByManagerAndStatus(@PathVariable String username,
-                                                                @RequestParam ProjectStatus status) {
-        logger.info("[GET] /api/projects/manager/{}/count?status={} - Counting manager's projects", username, status);
-        return ResponseEntity.ok(projectService.countProjectsByManagerAndStatus(username, status));
-    }
-
-    // ✅ Admin: Count all projects by status
     @GetMapping("/count")
     public ResponseEntity<Long> countProjectsByStatus(@RequestParam ProjectStatus status) {
         logger.info("[GET] /api/projects/count?status={} - Counting all projects by status", status);
         return ResponseEntity.ok(projectService.countProjectsByStatus(status));
+    }
+
+    // ✅ ADDED: Filter for Project Manager
+    @GetMapping("/manager/{managerId}/filter")
+    public ResponseEntity<List<ProjectSummaryDTO>> filterProjectsForManager(
+            @PathVariable Long managerId,
+            @RequestParam(required = false) String projectName,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String endDate) {
+        logger.info("[GET] /api/projects/manager/{}/filter - Filtering projects for manager", managerId);
+        return ResponseEntity.ok(projectService.filterProjectsByManager(managerId, projectName, status, endDate));
+    }
+
+    // ✅ ADDED: Count for Project Manager
+    @GetMapping("/manager/{managerId}/count")
+    public ResponseEntity<Long> countProjectsByStatusForManager(
+            @PathVariable Long managerId,
+            @RequestParam ProjectStatus status) {
+        logger.info("[GET] /api/projects/manager/{}/count?status={} - Counting projects for manager", managerId, status);
+        return ResponseEntity.ok(projectService.countProjectsByStatusForManager(managerId, status));
     }
 }
