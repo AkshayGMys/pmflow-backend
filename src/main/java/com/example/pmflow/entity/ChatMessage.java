@@ -3,6 +3,9 @@ package com.example.pmflow.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 @Entity
 @Table(name = "chat_messages")
 public class ChatMessage {
@@ -29,6 +32,7 @@ public class ChatMessage {
     // 🔹 Task related (only for private messages)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)  
     private Task task;
 
     // 🔹 Content of the message
