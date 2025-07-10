@@ -120,8 +120,8 @@ public class TaskService {
             response.setProjectManagerName(manager.getFirstName() + " " + manager.getLastName());
             response.setProjectManagerId(manager.getId());        }
         if (task.getProject().getName() != null) {
-            response.setProjectName(task.getProject().getName());
-         }
+           response.setProjectName(task.getProject().getName());
+        }
 
         response.setDueDate(task.getDueDate());
         response.setCreatedAt(task.getCreatedAt());
