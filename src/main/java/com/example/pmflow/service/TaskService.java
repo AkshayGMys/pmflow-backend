@@ -118,7 +118,9 @@ public class TaskService {
         if (task.getProject().getManager() != null) {
             User manager = task.getProject().getManager();
             response.setProjectManagerName(manager.getFirstName() + " " + manager.getLastName());
-        }
+            response.setProjectManagerId(manager.getId());       
+            }
+        
         if (task.getProject().getName() != null) {
            response.setProjectName(task.getProject().getName());
         }

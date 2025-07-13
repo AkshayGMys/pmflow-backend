@@ -108,5 +108,12 @@ public class TaskResponse {
 	}
 	private String projectName;
     private String projectManagerName;
+    public Long getProjectManagerId() {
+		return projectManagerId;
+	}
+	public void setProjectManagerId(Long projectManagerId) {
+		this.projectManagerId = projectManagerId;
+	}
+	private Long projectManagerId;
 
 }

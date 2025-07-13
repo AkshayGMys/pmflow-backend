@@ -2,6 +2,8 @@ package com.example.pmflow.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.example.pmflow.enums.TaskPriority;
 import com.example.pmflow.enums.TaskStatus;
@@ -116,6 +118,8 @@ public class Task {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatMessage> chatMessages = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
