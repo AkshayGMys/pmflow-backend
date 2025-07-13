@@ -13,57 +13,87 @@ import com.example.pmflow.entity.Role;
 import com.example.pmflow.entity.User;
 import com.example.pmflow.repository.UserRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
 @Service
 public class UserService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     private UserRepository userRepository;
 
+    // ✅ Get current user's profile
     public UserDTO getUserProfile(String username) {
+        logger.info("Fetching profile for username/email: {}", username);
         User user = userRepository.findByUsernameOrEmail(username, username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> {
+                    logger.error("User not found for: {}", username);
+                    return new UsernameNotFoundException("User not found");
+                });
+
+        logger.debug("User profile found: {}", user.getUsername());
         return toDTO(user);
     }
 
+    // ✅ Update current user's profile
     public UserDTO updateUserProfile(String username, UserDTO dto) {
+        logger.info("Updating profile for user: {}", username);
+
         User user = userRepository.findByUsernameOrEmail(username, username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> {
+                    logger.error("User not found for update: {}", username);
+                    return new UsernameNotFoundException("User not found");
+                });
+
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setEmail(dto.getEmail());
-        userRepository.save(user);
-        return toDTO(user);
+
+        User updated = userRepository.save(user);
+        logger.info("Profile updated for user: {}", username);
+        return toDTO(updated);
     }
 
+    // ✅ Get all users (admin)
     public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream().map(this::toDTO).toList();
+        logger.info("Fetching all users");
+        List<UserDTO> users = userRepository.findAll()
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+        logger.debug("Total users fetched: {}", users.size());
+        return users;
     }
-    
+
+    // ✅ Get users by role
     public List<UserDTO> getUsersByRole(String role) {
+        logger.info("Fetching users with role: {}", role);
         Role enumRole;
         try {
             enumRole = Role.valueOf(role.toUpperCase());
         } catch (IllegalArgumentException ex) {
+            logger.error("Invalid role requested: {}", role);
             throw new RuntimeException("Invalid role: " + role);
         }
 
         List<User> users = userRepository.findByRole(enumRole);
+        logger.debug("Found {} users with role {}", users.size(), role);
         return users.stream().map(this::toDTO).collect(Collectors.toList());
     }
 
-    private UserDTO toDTO(User user) {
-        UserDTO dto = new UserDTO();
-        dto.setUsername(user.getUsername());
-        dto.setEmail(user.getEmail());
-        dto.setFirstName(user.getFirstName());
-        dto.setLastName(user.getLastName());
-        dto.setRole(user.getRole());
-        dto.setId(user.getId());
-        return dto;
-    }
+    // ✅ Update user by admin
     public UserDTO adminUpdateUser(Long userId, AdminUpdateUserRequest request) {
+        logger.info("Admin updating user ID: {}", userId);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> {
+                    logger.error("User not found with ID: {}", userId);
+                    return new RuntimeException("User not found");
+                });
 
         if (request.getFirstName() != null) {
             user.setFirstName(request.getFirstName());
@@ -78,14 +108,19 @@ public class UserService {
         }
 
         User updated = userRepository.save(user);
+        logger.info("User updated successfully with ID: {}", userId);
+        return toDTO(updated);
+    }
 
-        // Convert to DTO
+    // ✅ Helper: Convert User to UserDTO
+    private UserDTO toDTO(User user) {
         UserDTO dto = new UserDTO();
-        dto.setUsername(updated.getUsername());
-        dto.setEmail(updated.getEmail());
-        dto.setFirstName(updated.getFirstName());
-        dto.setLastName(updated.getLastName());
-        dto.setRole(updated.getRole());
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
+        dto.setRole(user.getRole());
         return dto;
     }
 
