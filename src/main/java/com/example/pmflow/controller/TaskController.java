@@ -68,5 +68,11 @@ public class TaskController {
                                                           @RequestBody AdminUpdateTaskRequest request) {
         return ResponseEntity.ok(taskService.adminUpdateTask(taskId, request));
     }
+    @DeleteMapping("/{taskId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('PROJECT_MANAGER')") // Optional
+    public ResponseEntity<String> deleteTask(@PathVariable Long taskId) {
+        taskService.deleteTask(taskId);
+        return ResponseEntity.ok("Task deleted successfully.");
+    }
 
 }
