@@ -129,7 +129,7 @@ public class ChatService {
         Long currentUserId = getCurrentUserId();
         List<Project> projects = chatProjectRepo.findProjectsAssignedToUser(currentUserId);
         return projects.stream()
-                .map(p -> new MemberProjectDTO(p.getName(), p.getStatus().toString()))
+                .map(p -> new MemberProjectDTO(p.getId(),p.getName(), p.getStatus().toString()))
                 .collect(Collectors.toList());
     }
 
